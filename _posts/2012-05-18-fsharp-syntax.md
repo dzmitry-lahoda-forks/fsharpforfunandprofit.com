@@ -139,7 +139,7 @@ let f = fun x ->  // "fun" should define a new line at col 9
 
 ### Finding out more 
 
-There are many more details as to how indentation works, but the examples above should cover most of the common cases. If you want to know more, the complete language spec for F# is available from Microsoft as a [downloadable PDF](http://research.microsoft.com/en-us/um/cambridge/projects/fsharp/manual/spec.pdf), and is well worth reading.
+There are many more details as to how indentation works, but the examples above should cover most of the common cases. If you want to know more, the complete language spec for F# is available from Microsoft as a [downloadable PDF](https://fsharp.org/specs/language-spec/4.1/FSharpSpec-4.1-latest.pdf), and is well worth reading.
 
 ## "Verbose" syntax
 
