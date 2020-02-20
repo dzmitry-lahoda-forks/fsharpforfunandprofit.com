@@ -21,9 +21,9 @@ From a software design point of view, a message-based approach has a number of b
 * It encourages a "pipeline" model of programming with "producers" sending messages to decoupled "consumers", which has additional benefits:
   * The queue acts as a buffer, eliminating waiting on the client side.
   * It is straightforward to scale up one side or the other of the queue as needed in order to maximize throughput.
-  * Errors can be handled gracefully, because the decoupling means that agents can be created and destroyed without affecting their clients. 
+  * Errors can be handled gracefully, because the decoupling means that agents can be created and destroyed without affecting their clients.
 
-From a practical developer's point of view, what I find most appealing about the message-based approach is that when writing the code for any given actor, you don't have to hurt your brain by thinking about concurrency. The message queue forces a "serialization" of operations that otherwise might occur concurrently. And this in turn makes it much easier to think about (and write code for) the logic for processing a message, because you can be sure that your code will be isolated from other events that might interrupt your flow. 
+From a practical developer's point of view, what I find most appealing about the message-based approach is that when writing the code for any given actor, you don't have to hurt your brain by thinking about concurrency. The message queue forces a "serialization" of operations that otherwise might occur concurrently. And this in turn makes it much easier to think about (and write code for) the logic for processing a message, because you can be sure that your code will be isolated from other events that might interrupt your flow.
 
 With these advantages, it is not surprising that when a team inside Ericsson wanted to design a programming language for writing highly-concurrent telephony applications, they created one with a message-based approach, namely Erlang. Erlang has now become the poster child for the whole topic, and has created a lot of interest in implementing the same approach in other languages.
 
@@ -55,8 +55,8 @@ let printerAgent = MailboxProcessor.Start(fun inbox->
         return! messageLoop()  
         }
 
-    // start the loop 
-    messageLoop() 
+    // start the loop
+    messageLoop()
     )
 
 ```
@@ -87,7 +87,7 @@ Let's look at the shared state problem first.
 A common scenario is that you have some state that needs to be accessed and changed by multiple concurrent tasks or threads.
 We'll use a very simple case, and say that the requirements are:
 
-* A shared "counter" and "sum" that can be incremented by multiple tasks concurrently. 
+* A shared "counter" and "sum" that can be incremented by multiple tasks concurrently.
 * Changes to the counter and sum must be atomic -- we must guarantee that they will both be updated at the same time.
 
 ### The locking approach to shared state ###
@@ -188,14 +188,14 @@ let lockedExample5 =
         |> ignore
 ```
 
-Oh dear! Most tasks are now waiting quite a while. If two tasks want to update the state at the same time, one must wait for the other's work to complete before it can do its own work, which affects performance. 
+Oh dear! Most tasks are now waiting quite a while. If two tasks want to update the state at the same time, one must wait for the other's work to complete before it can do its own work, which affects performance.
 
-And if we add more and more tasks, the contention will increase, and the tasks will spend more and more time waiting rather than working. 
+And if we add more and more tasks, the contention will increase, and the tasks will spend more and more time waiting rather than working.
 
 ### The message-based approach to shared state ###
 
 Let's see how a message queue might help us. Here's the message based version:
-        
+
 ```fsharp
 type MessageBasedCounter () =
 
@@ -204,7 +204,7 @@ type MessageBasedCounter () =
         // increment the counters and...
         let newSum = sum + msg
         let newCount = count + 1
-        printfn "Count is: %i. Sum is: %i" newCount newSum 
+        printfn "Count is: %i. Sum is: %i" newCount newSum
 
         // ...emulate a short delay
         Utility.RandomSleep()
@@ -239,7 +239,7 @@ type MessageBasedCounter () =
 Some notes on this code:
 
 * The core "business logic" is again in the `updateState` method, which has almost the same implementation as the earlier example, except the state is immutable, so that a new state is created and returned to the main loop.
-* The agent reads messages (simple ints in this case) and then calls `updateState` method
+* The agent reads messages (simple `int`s in this case) and then calls `updateState` method
 * The public method `Add` posts a message to the agent, rather than calling the `updateState` method directly
 * This code is written in a more functional way; there are no mutable variables and no locks anywhere. In fact, there is no code dealing with concurrency at all!
 The code only has to focus on the business logic, and is consequently much easier to understand.
@@ -276,7 +276,7 @@ We can't measure the waiting time for the clients, because there is none!
 
 A similar concurrency problem occurs when accessing a shared IO resource such as a file:
 
-* If the IO is slow, the clients can spend a lot of time waiting, even without locks. 
+* If the IO is slow, the clients can spend a lot of time waiting, even without locks.
 * If multiple threads write to the resource at the same time, you can get corrupted data.
 
 Both problems can be solved by using asynchronous calls combined with buffering -- exactly what a message queue does.
@@ -347,7 +347,7 @@ Ouch! The output is very garbled!
 
 ### Serialized IO with messages ###
 
-So what happens when we replace `UnserializedLogger` with a `SerializedLogger` class that encapsulates a message queue. 
+So what happens when we replace `UnserializedLogger` with a `SerializedLogger` class that encapsulates a message queue.
 
 The agent inside `SerializedLogger` simply reads a message from its input queue and writes it to the slow console.  Again there is no code dealing with concurrency and no locks are used.
 
